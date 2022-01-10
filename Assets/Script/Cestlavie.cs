@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Cestlavie : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class Cestlavie : MonoBehaviour
                 _joint.connectedBody = Corpus[Corpus.Count - 2].GetComponent<Rigidbody>();
             }
             life = +_newlife;
+            Cuckoo();
             other.SendMessage("Nullification");
         }
         else if (other.gameObject.CompareTag("ScoreBlock") && !_colliding)
@@ -37,6 +39,7 @@ public class Cestlavie : MonoBehaviour
     {
         _colliding = true;
         life--;
+        Cuckoo();
         Destroy(Corpus[life]);
         yield return new WaitForSeconds(0.5f);
         _colliding = false;
@@ -53,5 +56,10 @@ public class Cestlavie : MonoBehaviour
             _joint = Corpus[Corpus.Count - 1].GetComponent<HingeJoint>();
             _joint.connectedBody = Corpus[Corpus.Count - 2].GetComponent<Rigidbody>();
         }
+        Cuckoo();
+    }
+    void Cuckoo()
+    {
+        gameObject.GetComponentInChildren<TextMeshProUGUI>().text = life.ToString();
     }
 }
