@@ -8,7 +8,7 @@ public class Durability : MonoBehaviour
     private bool _colliding = false;
     private void OnTriggerStay(Collider other)
     {
-        if(!_colliding)
+        if(other.gameObject.CompareTag("Player") && !_colliding)
             StartCoroutine(Decreasing());
     }
     void FixedUpdate()
@@ -20,8 +20,9 @@ public class Durability : MonoBehaviour
     {
         _colliding = true;
         durability--;
+        ScoreInform.score++;
         BroadcastMessage("Representation");
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         _colliding = false;
     }
 }

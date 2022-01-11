@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class Cestlavie : MonoBehaviour
 {
@@ -10,8 +12,11 @@ public class Cestlavie : MonoBehaviour
     private bool _colliding = false;
     public GameObject Segment;
     public List<GameObject> Corpus = new List<GameObject>();
-    static public GameObject Head;
+    public static GameObject Head;
     private HingeJoint _joint;
+    private int _prevRecord;
+    public Text Record;
+    public static bool gameover = false;
     private void OnTriggerStay(Collider other)
     {
         if (other.gameObject.CompareTag("Life"))
@@ -23,12 +28,12 @@ public class Cestlavie : MonoBehaviour
                 Corpus.Add(Corpusculum);
                 _joint = Corpus[Corpus.Count - 1].GetComponent<HingeJoint>();
                 _joint.connectedBody = Corpus[Corpus.Count - 2].GetComponent<Rigidbody>();
+                life++;
             }
-            life = +_newlife;
             Cuckoo();
             other.SendMessage("Nullification");
         }
-        else if (other.gameObject.CompareTag("ScoreBlock") && !_colliding)
+        else if (other.gameObject.CompareTag("ScoreBlock") && !_colliding && !gameover)
         {
             StartCoroutine(Deceasing());
         }
@@ -41,8 +46,9 @@ public class Cestlavie : MonoBehaviour
         life--;
         Cuckoo();
         Destroy(Corpus[life]);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         _colliding = false;
+        this.gameObject.SendMessage("Hammertime");
     }
     private void Start()
     {
@@ -61,5 +67,35 @@ public class Cestlavie : MonoBehaviour
     void Cuckoo()
     {
         gameObject.GetComponentInChildren<TextMeshProUGUI>().text = life.ToString();
+    }
+    void GameOver()
+    {
+        gameover = true;
+        Time.timeScale = 0;
+        _prevRecord = PlayerPrefs.GetInt("Record", 0);
+        if (ScoreInform.score > _prevRecord)
+        {
+            PlayerPrefs.SetInt("Record", ScoreInform.score);
+            Record.text = "Your new record is " + ScoreInform.score.ToString("F0") + "!";
+        }
+        else
+            Record.text = "Your current record is " + _prevRecord.ToString("F0");
+    }
+    public void ReloadGame()
+    {
+        ScoreInform.score = 0;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+    private void Awake()
+    {
+        life = 4;
+        gameover = false;
+        Time.timeScale = 1;
+       
+    }
+    private void FixedUpdate()
+    {
+        if (life <= 0)
+            GameOver();
     }
 }
